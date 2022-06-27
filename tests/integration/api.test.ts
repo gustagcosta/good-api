@@ -23,7 +23,7 @@ test('testing route GET /posts', async function () {
     method: 'get',
   });
 
-  expect(response.data).toHaveLength(1);
+  expect(response.data).not.toHaveLength(0);
 });
 
 test('testing route DELETE /posts/:id', async function () {

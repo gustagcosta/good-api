@@ -1,13 +1,15 @@
-import CreatePost from '../../src/use-cases/create-post';
-import DeletePost from '../../src/use-cases/delete-post';
-import GetPosts from '../../src/use-cases/get-posts';
+import CreatePost from '../../src/application/create-post';
+import DeletePost from '../../src/application/delete-post';
+import GetPosts from '../../src/application/get-posts';
+import PostDatabaseRepository from '../../src/infra/repository/post-database-repository';
 
 let idForDelete: number;
 
 test('should create a new post', async function () {
-  const createPost = new CreatePost();
+  const postRepository = new PostDatabaseRepository();
+  const createPost = new CreatePost(postRepository);
 
-  const { id } = await createPost.execute({
+  const id = await createPost.execute({
     title: 'teste',
     content: 'testando',
   });
@@ -18,15 +20,17 @@ test('should create a new post', async function () {
 });
 
 test('should get all posts', async function () {
-  const getAllPosts = new GetPosts();
+  const postRepository = new PostDatabaseRepository();
+  const getAllPosts = new GetPosts(postRepository);
 
   const posts = await getAllPosts.execute();
 
-  expect(posts).toHaveLength(1);
+  expect(posts).not.toHaveLength(0);
 });
 
 test('should delete a post', async function () {
-  const deletePost = new DeletePost();
+  const postRepository = new PostDatabaseRepository();
+  const deletePost = new DeletePost(postRepository);
 
   await deletePost.execute({ id: idForDelete });
 });

@@ -1,4 +1,3 @@
-import mysql from 'promise-mysql';
 import PostRepository from '../domain/repository/post-repository';
 
 type Input = {

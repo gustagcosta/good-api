@@ -1,51 +1,26 @@
 import Post from '../../domain/entity/post';
 import PostRepository from '../../domain/repository/post-repository';
-import mysql from 'promise-mysql';
+import Connection from '../database/connection';
 
 export default class PostDatabaseRepository implements PostRepository {
-  async save(post: Post): Promise<number> {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    });
+  constructor(readonly connection: Connection) { }
 
-    const result = await connection.query(
+  async save(post: Post): Promise<number> {
+    const [result] = await this.connection.query(
       `INSERT INTO posts (title, content) VALUES (?, ?)`,
       [post.title, post.content]
     );
-
-    await connection.end();
 
     return result.insertId;
   }
 
   async get(): Promise<Post[]> {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    });
-
-    const posts: Post[] = await connection.query('SELECT * FROM posts');
-
-    await connection.end();
+    const posts: Post[] = await this.connection.query('SELECT * FROM posts');
 
     return posts;
   }
 
   async delete(id: number): Promise<void> {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    });
-
-    await connection.query(`DELETE FROM posts WHERE id = ?`, [id]);
-
-    await connection.end();
+    await this.connection.query(`DELETE FROM posts WHERE id = ?`, [id]);
   }
 }

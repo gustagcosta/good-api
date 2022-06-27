@@ -2,7 +2,7 @@ import axios from 'axios';
 
 let id: number;
 
-test('should create a new post', async function () {
+test('testing route POST /posts', async function () {
   const response = await axios({
     url: `http://${process.env.HOST}:${process.env.PORT}/posts`,
     method: 'post',
@@ -17,7 +17,7 @@ test('should create a new post', async function () {
   id = response.data.id;
 });
 
-test('should get all posts', async function () {
+test('testing route GET /posts', async function () {
   const response = await axios({
     url: `http://${process.env.HOST}:${process.env.PORT}/posts`,
     method: 'get',
@@ -26,7 +26,7 @@ test('should get all posts', async function () {
   expect(response.data).toHaveLength(1);
 });
 
-test('should delete a post', async function () {
+test('testing route DELETE /posts/:id', async function () {
   const deleteResponse = await axios({
     url: `http://${process.env.HOST}:${process.env.PORT}/posts/${id}`,
     method: 'delete',

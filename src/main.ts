@@ -1,24 +1,19 @@
 import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
-import mysql from 'promise-mysql';
+import CreatePost from './use-cases/create-post';
+import DeletePost from './use-cases/delete-post';
+import GetPosts from './use-cases/get-posts';
 
 const app = express();
 app.use(express.json());
 
 app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    });
+    const getPosts = new GetPosts();
 
-    const query = await connection.query('SELECT * FROM posts');
+    const posts = await getPosts.execute();
 
-    await connection.end();
-
-    return res.json(query);
+    return res.json(posts);
   } catch (error) {
     next(error);
   }
@@ -26,21 +21,14 @@ app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
 
 app.post('/posts', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQL_HOST,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
+    const createPost = new CreatePost();
+
+    const result = await createPost.execute({
+      title: req.body.title,
+      content: req.body.content,
     });
 
-    const result = await connection.query(
-      `INSERT INTO posts (title, content) VALUES (?, ?)`,
-      [req.body.title, req.body.content]
-    );
-
-    await connection.end();
-
-    return res.status(201).json({ id: result.insertId });
+    return res.status(201).json(result);
   } catch (error) {
     next(error);
   }
@@ -50,16 +38,9 @@ app.delete(
   '/posts/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const connection = await mysql.createConnection({
-        host: process.env.MYSQL_HOST,
-        user: process.env.MYSQL_USER,
-        password: process.env.MYSQL_PASSWORD,
-        database: process.env.MYSQL_DATABASE,
-      });
+      const deletePost = new DeletePost();
 
-      await connection.query(`DELETE FROM posts WHERE id = ?`, [req.params.id]);
-
-      await connection.end();
+      await deletePost.execute({ id: +req.params.id });
 
       return res.sendStatus(200);
     } catch (error) {
